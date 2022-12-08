@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -55,5 +56,23 @@ public final class Constants {
       default:
         return RunningMode.REAL;
     }
+  }
+
+  public static final int xboxControllerPort = 0;
+
+  public static class Elevator {
+    public static final int elevatorMotorID = 9;
+    public static final int elevatorEncoderA = 4;
+    public static final int elevatorEncoderB = 5;
+
+    public static final double distancePerPulseFactor =
+        (2.0 * Math.PI * (0.0363728 / 2.0)) * 2.0 / 2048.0;
+
+    public static final double carriageMass = 9.78;
+    public static final double drumRadius = 0.0363728 / 2.0;
+    public static final double elevatorGearing = 1.0;
+
+    public static final TrapezoidProfile.Constraints m_constraints =
+        new TrapezoidProfile.Constraints(8.6, 4.3);
   }
 }

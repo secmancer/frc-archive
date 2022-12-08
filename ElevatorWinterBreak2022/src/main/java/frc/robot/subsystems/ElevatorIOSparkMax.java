@@ -2,42 +2,37 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Constants;
 
 public class ElevatorIOSparkMax implements ElevatorIO {
-    
-    private CANSparkMax m_elevatorGrbx;
-    private Encoder m_elevatorEncoder;
 
-    public ElevatorIOSparkMax() {
-        m_elevatorGrbx = new CANSparkMax(9, MotorType.kBrushless);
-        m_elevatorEncoder = new Encoder(4, 5);
+  private CANSparkMax m_elevatorGrbx;
+  private Encoder m_elevatorEncoder;
 
-        m_elevatorGrbx.setSmartCurrentLimit(60);
-        m_elevatorGrbx.setInverted(true);
-        m_elevatorGrbx.set(0.0);
-        m_elevatorEncoder.setDistancePerPulse((2.0 * Math.PI * (0.0363728 / 2.0)) * 2.0 / 2048.0);
-    }
+  public ElevatorIOSparkMax() {
+    m_elevatorGrbx = new CANSparkMax(Constants.Elevator.elevatorMotorID, MotorType.kBrushless);
+    m_elevatorEncoder =
+        new Encoder(Constants.Elevator.elevatorEncoderA, Constants.Elevator.elevatorEncoderB);
 
-    @Override
-    public void updateInputs(ElevatorInputs inputs) {
-        inputs.positionRad = m_elevatorEncoder.getDistance();
-        inputs.velocityRadPerSec = m_elevatorEncoder.getRate();
-        inputs.appliedVolts = m_elevatorGrbx.getAppliedOutput() * RobotController.getBatteryVoltage();
-        inputs.currentAmps = new double[] { m_elevatorGrbx.getOutputCurrent() };
-        inputs.tempCelcius = new double[] { m_elevatorGrbx.getMotorTemperature() };
-    }
+    m_elevatorGrbx.setSmartCurrentLimit(60);
+    m_elevatorGrbx.setInverted(true);
+    m_elevatorGrbx.set(0.0);
+    m_elevatorEncoder.setDistancePerPulse((2.0 * Math.PI * (0.0363728 / 2.0)) * 2.0 / 2048.0);
+  }
 
-    @Override
-    public void setVoltage(double volts) {
-        m_elevatorGrbx.setVoltage(volts);
-    }
+  @Override
+  public void updateInputs(ElevatorInputs inputs) {
+    inputs.positionRad = m_elevatorEncoder.getDistance();
+    inputs.velocityRadPerSec = m_elevatorEncoder.getRate();
+    inputs.appliedVolts = m_elevatorGrbx.getAppliedOutput() * RobotController.getBatteryVoltage();
+    inputs.currentAmps = new double[] {m_elevatorGrbx.getOutputCurrent()};
+    inputs.tempCelcius = new double[] {m_elevatorGrbx.getMotorTemperature()};
+  }
 
-    @Override
-    public void reset() {
-        m_elevatorEncoder.reset();
-    }
-
+  @Override
+  public void setVoltage(double volts) {
+    m_elevatorGrbx.setVoltage(volts);
+  }
 }
