@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.RunningMode;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.inputs.LoggedNetworkTables;
 import org.littletonrobotics.junction.io.ByteLogReceiver;
 import org.littletonrobotics.junction.io.ByteLogReplay;
 import org.littletonrobotics.junction.io.LogSocketServer;
@@ -34,11 +33,9 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     Logger logger = Logger.getInstance();
     setUseTiming(Constants.getMode() != RunningMode.REPLAY);
-    LoggedNetworkTables.getInstance().addTable("/SmartDashboard");
 
     switch (Constants.getMode()) {
       case REAL:
-        logger.addDataReceiver(new ByteLogReceiver("/home/lvuser"));
         logger.addDataReceiver(new LogSocketServer(5900));
         break;
 
@@ -105,6 +102,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.init();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

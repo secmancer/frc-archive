@@ -20,6 +20,9 @@ import frc.robot.subsystems.ElevatorIO.ElevatorInputs;
 
 public class Elevator extends SubsystemBase {
 
+  private boolean closedLoop = false;
+  private double elevatorGoal = 0.0;
+
   private final ElevatorIO elevatorIO;
   private final ElevatorInputs elevatorInputs = new ElevatorInputs();
 
@@ -30,9 +33,9 @@ public class Elevator extends SubsystemBase {
       LinearSystemId.createElevatorSystem(
           DCMotor.getNEO(1),
           Constants.Elevator.carriageMass,
-          Constants.Elevator.drumRadius,
+          0.0181864,
           Constants.Elevator.elevatorGearing);
-
+          
   private final KalmanFilter<N2, N1, N1> m_observer =
       new KalmanFilter<>(
           Nat.N2(),
@@ -54,9 +57,6 @@ public class Elevator extends SubsystemBase {
 
   public Elevator(ElevatorIO io) {
     this.elevatorIO = io;
-
-    reset();
-    setGoal(0.0);
   }
 
   public void reset() {
@@ -65,21 +65,35 @@ public class Elevator extends SubsystemBase {
         new TrapezoidProfile.State(elevatorInputs.positionRad, elevatorInputs.velocityRadPerSec);
   }
 
+  public void setSpeed(double percent) {
+    closedLoop = false;
+    elevatorIO.setSpeed(percent);
+  }
+
   public void setGoal(double positionMeters) {
-    goal = new TrapezoidProfile.State(positionMeters, 0.0);
+    closedLoop = true;
+    elevatorGoal = positionMeters;
   }
 
   public void controllerPeriodic() {
-    m_lastProfiledReference =
+    if (closedLoop) {
+      if (elevatorGoal > 0.0) {
+        goal = new TrapezoidProfile.State(elevatorGoal, 0.0);
+      } else {
+        goal = new TrapezoidProfile.State(0.0, 0.0);
+      }
+
+      m_lastProfiledReference =
         (new TrapezoidProfile(Constants.Elevator.m_constraints, goal, m_lastProfiledReference)).calculate(0.020);
-    m_loop.setNextR(m_lastProfiledReference.position, m_lastProfiledReference.velocity);
+      m_loop.setNextR(m_lastProfiledReference.position, m_lastProfiledReference.velocity);
 
-    m_loop.correct(VecBuilder.fill(elevatorInputs.positionRad));
+      m_loop.correct(VecBuilder.fill(elevatorInputs.positionRad));
 
-    m_loop.predict(0.020);
+      m_loop.predict(0.020);
 
-    double nextVoltage = m_loop.getU(0);
-    elevatorIO.setVoltage(nextVoltage);
+      double nextVoltage = m_loop.getU(0);
+      elevatorIO.setVoltage(nextVoltage);
+    }
   }
 
   @Override

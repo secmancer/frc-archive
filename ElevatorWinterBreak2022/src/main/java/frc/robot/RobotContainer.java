@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ElevatorIO;
 import frc.robot.subsystems.ElevatorIOSparkMax;
@@ -26,6 +27,13 @@ public class RobotContainer {
   // Elevator subsystem
   private Elevator elevator;
 
+  // Buttons
+  private final JoystickButton m_goUp =
+      new JoystickButton(controller, XboxController.Button.kY.value);
+  private final JoystickButton m_goDown =
+      new JoystickButton(controller, XboxController.Button.kA.value);
+    
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -43,8 +51,16 @@ public class RobotContainer {
 
     // Register missing subsystems
     elevator = elevator != null ? elevator : new Elevator(new ElevatorIO() {});
+    
+    // elevator.setDefaultCommand(new RunElevator(elevator, () -> MathUtil.applyDeadband(controller.getRightY(), 0.1)));
+    m_goUp.whenHeld(new InstantCommand(() -> elevator.setGoal(2)));
+    m_goDown.whenHeld(new InstantCommand(() -> elevator.setGoal(0.0)));
 
     configureButtonBindings();
+  }
+
+  public void init() {
+    elevator.reset();
   }
 
   /**

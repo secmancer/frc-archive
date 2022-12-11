@@ -68,9 +68,9 @@ public final class Constants {
     public static final double distancePerPulseFactor =
         (2.0 * Math.PI * (0.0363728 / 2.0)) * 2.0 / 2048.0;
 
-    public static final double carriageMass = 9.78;
+    public static final double carriageMass = 8.381376;
     public static final double drumRadius = 0.0363728 / 2.0;
-    public static final double elevatorGearing = 1.0;
+    public static final double elevatorGearing = 12.5;
 
     public static final TrapezoidProfile.Constraints m_constraints =
         new TrapezoidProfile.Constraints(8.6, 4.3);

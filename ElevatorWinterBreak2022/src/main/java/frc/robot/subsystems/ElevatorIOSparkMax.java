@@ -19,7 +19,8 @@ public class ElevatorIOSparkMax implements ElevatorIO {
     m_elevatorGrbx.setSmartCurrentLimit(60);
     m_elevatorGrbx.setInverted(true);
     m_elevatorGrbx.set(0.0);
-    m_elevatorEncoder.setDistancePerPulse((2.0 * Math.PI * (0.0363728 / 2.0)) * 2.0 / 2048.0);
+    m_elevatorEncoder.setReverseDirection(true);
+    m_elevatorEncoder.setDistancePerPulse(2.0 * Math.PI * Constants.Elevator.drumRadius / 2048.0);
   }
 
   @Override
@@ -34,5 +35,10 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   @Override
   public void setVoltage(double volts) {
     m_elevatorGrbx.setVoltage(volts);
+  }
+
+  @Override
+  public void setSpeed(double percent) {
+    m_elevatorGrbx.set(percent);
   }
 }
