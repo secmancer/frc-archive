@@ -53,14 +53,18 @@ public class RobotContainer {
     elevator = elevator != null ? elevator : new Elevator(new ElevatorIO() {});
     
     // elevator.setDefaultCommand(new RunElevator(elevator, () -> MathUtil.applyDeadband(controller.getRightY(), 0.1)));
-    m_goUp.whenHeld(new InstantCommand(() -> elevator.setGoal(2)));
-    m_goDown.whenHeld(new InstantCommand(() -> elevator.setGoal(0.0)));
+    m_goUp.whenPressed(new InstantCommand(() -> elevator.setGoal(2)));
+    m_goDown.whenPressed(new InstantCommand(() -> elevator.setGoal(0.0)));
 
     configureButtonBindings();
   }
 
-  public void init() {
-    elevator.reset();
+  public void enableElevatorController() {
+    elevator.enable();
+  }
+
+  public void disableElevatorController() {
+    elevator.disable();
   }
 
   /**

@@ -19,7 +19,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
     m_elevatorGrbx.setSmartCurrentLimit(60);
     m_elevatorGrbx.setInverted(true);
     m_elevatorGrbx.set(0.0);
-    m_elevatorEncoder.setReverseDirection(true);
     m_elevatorEncoder.setDistancePerPulse(2.0 * Math.PI * Constants.Elevator.drumRadius / 2048.0);
   }
 

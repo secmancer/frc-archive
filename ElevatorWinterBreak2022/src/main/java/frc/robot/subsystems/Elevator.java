@@ -20,7 +20,7 @@ import frc.robot.subsystems.ElevatorIO.ElevatorInputs;
 
 public class Elevator extends SubsystemBase {
 
-  private boolean closedLoop = false;
+  private boolean isEnabled = true;
   private double elevatorGoal = 0.0;
 
   private final ElevatorIO elevatorIO;
@@ -57,6 +57,9 @@ public class Elevator extends SubsystemBase {
 
   public Elevator(ElevatorIO io) {
     this.elevatorIO = io;
+
+    reset();
+    setGoal(0.0);
   }
 
   public void reset() {
@@ -64,19 +67,25 @@ public class Elevator extends SubsystemBase {
     m_lastProfiledReference =
         new TrapezoidProfile.State(elevatorInputs.positionRad, elevatorInputs.velocityRadPerSec);
   }
+  
+  public void enable() {
+    isEnabled = true;
+  }
+
+  public void disable() {
+    isEnabled = false;
+  }
 
   public void setSpeed(double percent) {
-    closedLoop = false;
     elevatorIO.setSpeed(percent);
   }
 
   public void setGoal(double positionMeters) {
-    closedLoop = true;
     elevatorGoal = positionMeters;
   }
 
   public void controllerPeriodic() {
-    if (closedLoop) {
+    if (isEnabled) {
       if (elevatorGoal > 0.0) {
         goal = new TrapezoidProfile.State(elevatorGoal, 0.0);
       } else {
