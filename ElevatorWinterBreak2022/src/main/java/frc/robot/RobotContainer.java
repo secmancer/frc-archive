@@ -4,11 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.RunElevator;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ElevatorIO;
 import frc.robot.subsystems.ElevatorIOSparkMax;
@@ -52,19 +54,11 @@ public class RobotContainer {
     // Register missing subsystems
     elevator = elevator != null ? elevator : new Elevator(new ElevatorIO() {});
     
-    // elevator.setDefaultCommand(new RunElevator(elevator, () -> MathUtil.applyDeadband(controller.getRightY(), 0.1)));
-    m_goUp.whenPressed(new InstantCommand(() -> elevator.setGoal(2)));
+    elevator.setDefaultCommand(new RunElevator(elevator, () -> MathUtil.applyDeadband(controller.getRightY(), 0.1)));
+    m_goUp.whenPressed(new InstantCommand(() -> elevator.setGoal(1.0)));
     m_goDown.whenPressed(new InstantCommand(() -> elevator.setGoal(0.0)));
 
     configureButtonBindings();
-  }
-
-  public void enableElevatorController() {
-    elevator.enable();
-  }
-
-  public void disableElevatorController() {
-    elevator.disable();
   }
 
   /**

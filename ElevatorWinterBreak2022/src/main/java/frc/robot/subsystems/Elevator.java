@@ -20,14 +20,11 @@ import frc.robot.subsystems.ElevatorIO.ElevatorInputs;
 
 public class Elevator extends SubsystemBase {
 
-  private boolean isEnabled = true;
-  private double elevatorGoal = 0.0;
-
   private final ElevatorIO elevatorIO;
   private final ElevatorInputs elevatorInputs = new ElevatorInputs();
-
   private TrapezoidProfile.State m_lastProfiledReference = new TrapezoidProfile.State();
-  private TrapezoidProfile.State goal;
+  private TrapezoidProfile.State goal = new TrapezoidProfile.State(0.0, 0.0);;
+  private boolean closedLoop = true;
 
   private final LinearSystem<N2, N1, N1> m_elevatorPlant =
       LinearSystemId.createElevatorSystem(
@@ -57,9 +54,6 @@ public class Elevator extends SubsystemBase {
 
   public Elevator(ElevatorIO io) {
     this.elevatorIO = io;
-
-    reset();
-    setGoal(0.0);
   }
 
   public void reset() {
@@ -67,31 +61,22 @@ public class Elevator extends SubsystemBase {
     m_lastProfiledReference =
         new TrapezoidProfile.State(elevatorInputs.positionRad, elevatorInputs.velocityRadPerSec);
   }
-  
-  public void enable() {
-    isEnabled = true;
-  }
-
-  public void disable() {
-    isEnabled = false;
-  }
 
   public void setSpeed(double percent) {
+    closedLoop = false;
     elevatorIO.setSpeed(percent);
   }
 
   public void setGoal(double positionMeters) {
-    elevatorGoal = positionMeters;
+    if (!closedLoop) {
+      closedLoop = true;
+      reset();
+    }
+    goal = new TrapezoidProfile.State(positionMeters, 0.0);
   }
 
   public void controllerPeriodic() {
-    if (isEnabled) {
-      if (elevatorGoal > 0.0) {
-        goal = new TrapezoidProfile.State(elevatorGoal, 0.0);
-      } else {
-        goal = new TrapezoidProfile.State(0.0, 0.0);
-      }
-
+    if (closedLoop) {
       m_lastProfiledReference =
         (new TrapezoidProfile(Constants.Elevator.m_constraints, goal, m_lastProfiledReference)).calculate(0.020);
       m_loop.setNextR(m_lastProfiledReference.position, m_lastProfiledReference.velocity);
