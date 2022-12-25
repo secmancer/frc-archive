@@ -1,7 +1,8 @@
-package frc.robot.subsystems;
+package frc3512.robot.subsystems;
 
-import org.littletonrobotics.junction.Logger;
-
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.LinearQuadraticRegulator;
@@ -14,17 +15,19 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.subsystems.ElevatorIO.ElevatorInputs;
+import frc3512.lib.logging.NetworkTableUtil;
+import frc3512.robot.Constants;
 
 public class Elevator extends SubsystemBase {
 
-  private final ElevatorIO elevatorIO;
-  private final ElevatorInputs elevatorInputs = new ElevatorInputs();
   private TrapezoidProfile.State m_lastProfiledReference = new TrapezoidProfile.State();
-  private TrapezoidProfile.State goal = new TrapezoidProfile.State(0.0, 0.0);;
+  private TrapezoidProfile.State goal = new TrapezoidProfile.State(0.0, 0.0);
   private boolean closedLoop = true;
+
+  private final CANSparkMax m_elevatorGrbx;
+  private final RelativeEncoder m_elevatorEncoder;
 
   private final LinearSystem<N2, N1, N1> m_elevatorPlant =
       LinearSystemId.createElevatorSystem(
@@ -32,7 +35,7 @@ public class Elevator extends SubsystemBase {
           Constants.Elevator.carriageMass,
           0.0181864,
           Constants.Elevator.elevatorGearing);
-          
+
   private final KalmanFilter<N2, N1, N1> m_observer =
       new KalmanFilter<>(
           Nat.N2(),
@@ -52,19 +55,28 @@ public class Elevator extends SubsystemBase {
   private final LinearSystemLoop<N2, N1, N1> m_loop =
       new LinearSystemLoop<>(m_elevatorPlant, m_controller, m_observer, 12.0, 0.020);
 
-  public Elevator(ElevatorIO io) {
-    this.elevatorIO = io;
+  private final NetworkTableEntry positionEntry =
+      NetworkTableUtil.makeDoubleEntry("/Diagnostics/Elevator/Position");
+  private final NetworkTableEntry velocityEntry =
+      NetworkTableUtil.makeDoubleEntry("/Diagnostics/Elevator/Velocity");
+
+  public Elevator() {
+    m_elevatorGrbx = new CANSparkMax(Constants.Elevator.elevatorMotorID, MotorType.kBrushless);
+    m_elevatorEncoder = m_elevatorGrbx.getEncoder();
+
+    m_elevatorGrbx.setSmartCurrentLimit(60);
+    m_elevatorGrbx.setInverted(true);
+    m_elevatorGrbx.set(0.0);
   }
 
   public void reset() {
-    m_loop.reset(VecBuilder.fill(elevatorInputs.positionRad, elevatorInputs.velocityRadPerSec));
-    m_lastProfiledReference =
-        new TrapezoidProfile.State(elevatorInputs.positionRad, elevatorInputs.velocityRadPerSec);
+    m_loop.reset(VecBuilder.fill(getPosition(), getRate()));
+    m_lastProfiledReference = new TrapezoidProfile.State(getPosition(), getRate());
   }
 
   public void setSpeed(double percent) {
     closedLoop = false;
-    elevatorIO.setSpeed(percent);
+    m_elevatorGrbx.set(percent);
   }
 
   public void setGoal(double positionMeters) {
@@ -72,29 +84,44 @@ public class Elevator extends SubsystemBase {
       closedLoop = true;
       reset();
     }
-    goal = new TrapezoidProfile.State(positionMeters, 0.0);
+
+    if (positionMeters > 0.0) {
+      goal = new TrapezoidProfile.State(positionMeters, 0.0);
+    } else {
+      goal = new TrapezoidProfile.State(0.0, 0.0);
+    }
+  }
+
+  public double getPosition() {
+    return Units.rotationsToRadians(
+        m_elevatorEncoder.getPosition() * Constants.Elevator.drumRadius);
+  }
+
+  public double getRate() {
+    return Units.rotationsPerMinuteToRadiansPerSecond(
+        m_elevatorEncoder.getVelocity() * Constants.Elevator.drumRadius);
   }
 
   public void controllerPeriodic() {
     if (closedLoop) {
       m_lastProfiledReference =
-        (new TrapezoidProfile(Constants.Elevator.m_constraints, goal, m_lastProfiledReference)).calculate(0.020);
+          (new TrapezoidProfile(Constants.Elevator.m_constraints, goal, m_lastProfiledReference))
+              .calculate(0.020);
       m_loop.setNextR(m_lastProfiledReference.position, m_lastProfiledReference.velocity);
 
-      m_loop.correct(VecBuilder.fill(elevatorInputs.positionRad));
+      m_loop.correct(VecBuilder.fill(getPosition()));
 
       m_loop.predict(0.020);
 
       double nextVoltage = m_loop.getU(0);
-      elevatorIO.setVoltage(nextVoltage);
+      m_elevatorGrbx.setVoltage(nextVoltage);
     }
   }
 
   @Override
   public void periodic() {
     controllerPeriodic();
-
-    elevatorIO.updateInputs(elevatorInputs);
-    Logger.getInstance().processInputs("Elevator", elevatorInputs);
+    positionEntry.setDouble(getPosition());
+    velocityEntry.setDouble(getRate());
   }
 }

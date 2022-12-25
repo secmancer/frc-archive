@@ -2,18 +2,14 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package frc3512.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.RunElevator;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ElevatorIO;
-import frc.robot.subsystems.ElevatorIOSparkMax;
+import frc3512.robot.subsystems.Elevator;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -27,36 +23,18 @@ public class RobotContainer {
   private final XboxController controller = new XboxController(Constants.xboxControllerPort);
 
   // Elevator subsystem
-  private Elevator elevator;
+  private Elevator elevator = new Elevator();
 
   // Buttons
   private final JoystickButton m_goUp =
       new JoystickButton(controller, XboxController.Button.kY.value);
   private final JoystickButton m_goDown =
       new JoystickButton(controller, XboxController.Button.kA.value);
-    
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    if (Constants.getMode() != Constants.RunningMode.REPLAY) {
-      switch (Constants.getRobot()) {
-        case ROBOT_2022_REAL:
-          elevator = new Elevator(new ElevatorIOSparkMax());
-          break;
-        case ROBOT_2022_SIM:
-          break;
-        default:
-          break;
-      }
-    }
-
-    // Register missing subsystems
-    elevator = elevator != null ? elevator : new Elevator(new ElevatorIO() {});
-    
-    elevator.setDefaultCommand(new RunElevator(elevator, () -> MathUtil.applyDeadband(controller.getRightY(), 0.1)));
-    m_goUp.whenPressed(new InstantCommand(() -> elevator.setGoal(1.0)));
-    m_goDown.whenPressed(new InstantCommand(() -> elevator.setGoal(0.0)));
+    // elevator.setDefaultCommand(new RunElevator(elevator, () ->
+    // MathUtil.applyDeadband(controller.getRightY(), 0.1)));
 
     configureButtonBindings();
   }
@@ -67,7 +45,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    m_goUp.whenPressed(new InstantCommand(() -> elevator.setGoal(1.0)));
+    m_goDown.whenPressed(new InstantCommand(() -> elevator.setGoal(0.0)));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
