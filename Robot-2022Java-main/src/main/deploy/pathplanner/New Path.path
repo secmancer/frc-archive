@@ -1,0 +1,99 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 1.0,
+        "y": 3.0
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.9527052648692353,
+        "y": 2.993415639230831
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "waitTime": 0
+    },
+    {
+      "anchorPoint": {
+        "x": 3.016399265694737,
+        "y": 2.5777516957935696
+      },
+      "prevControl": {
+        "x": 1.6942945181713813,
+        "y": 2.57119824058933
+      },
+      "nextControl": {
+        "x": 4.154698562912752,
+        "y": 2.583394057692133
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "waitTime": 0
+    },
+    {
+      "anchorPoint": {
+        "x": 5.0,
+        "y": 3.0
+      },
+      "prevControl": {
+        "x": 4.005196351464131,
+        "y": 2.993433434857941
+      },
+      "nextControl": {
+        "x": 5.994803648535869,
+        "y": 3.006566565142059
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "waitTime": 0
+    },
+    {
+      "anchorPoint": {
+        "x": 6.5517678123525895,
+        "y": 2.3780038182286183
+      },
+      "prevControl": {
+        "x": 6.1603070698886935,
+        "y": 2.3969969188264266
+      },
+      "nextControl": {
+        "x": 6.943228554816486,
+        "y": 2.35901071763081
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "waitTime": 0
+    },
+    {
+      "anchorPoint": {
+        "x": 7.8633411215483155,
+        "y": 3.038374855990783
+      },
+      "prevControl": {
+        "x": 7.131404108288128,
+        "y": 2.995543651801589
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "waitTime": 0
+    }
+  ],
+  "markers": []
+}
