@@ -22,7 +22,7 @@ jobs:
 
     defaults:
         run:
-          working-directory: ./swervedrive-offseason-2022-main
+          working-directory: ./Robot-2022-Java-main
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
